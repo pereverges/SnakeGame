@@ -1,4 +1,4 @@
-import sys, pygame, numpy, random, time
+import sys, pygame, random
 
 GRID_HEIGHT = 400
 GRID_WIDTH = 400
