@@ -1,5 +1,6 @@
 import sys, pygame, numpy, random
 
+
 GRID_HEIGHT = 400
 GRID_WIDTH = 400
 CELL_HEIGHT = CELL_WIDTH = 20
@@ -7,6 +8,8 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 RED = (255,0,0)
 GREEN = (0,255,0)
+WINDOW_HEIGHT = GRID_HEIGHT + 100
+WINDOW_WIDTH = GRID_WIDTH
 N_VERTICAL_CELLS = int(GRID_HEIGHT/CELL_HEIGHT)
 N_HORITZONTAL_CELLS = int(GRID_WIDTH/CELL_WIDTH)
 
@@ -53,6 +56,9 @@ class Snake:
             draw_apple()
         else:
             self.remove_tail()
+        x_head, y_head = self.get_head()
+        if x_head < 0 or x_head >= N_HORITZONTAL_CELLS or y_head < 0 or y_head >= N_VERTICAL_CELLS:
+            stop()
 
     def new_apple(self):
         possible_values = list(range(0, N_VERTICAL_CELLS * N_HORITZONTAL_CELLS))
@@ -64,7 +70,7 @@ class Snake:
 
 SNAKE = Snake()
 pygame.init()
-SCREEN = pygame.display.set_mode((GRID_HEIGHT + 1, GRID_WIDTH + 1))
+SCREEN = pygame.display.set_mode((WINDOW_WIDTH + 1, WINDOW_HEIGHT + 1))
 SCREEN.fill(BLACK)
 
 
@@ -83,6 +89,7 @@ def draw_grid():
 def main():
     draw_grid()
     draw_apple()
+    draw_snake()
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -111,7 +118,6 @@ def draw_cell(x,y,color):
 
 def draw_apple():
     x, y = SNAKE.get_apple()
-    print(x,y)
     draw_cell(x,y,RED)
 
 
