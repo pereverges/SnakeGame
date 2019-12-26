@@ -1,5 +1,4 @@
-import sys, pygame, numpy, random
-
+import sys, pygame, numpy, random, time
 
 GRID_HEIGHT = 400
 GRID_WIDTH = 400
@@ -12,15 +11,17 @@ WINDOW_HEIGHT = GRID_HEIGHT + 100
 WINDOW_WIDTH = GRID_WIDTH
 N_VERTICAL_CELLS = int(GRID_HEIGHT/CELL_HEIGHT)
 N_HORITZONTAL_CELLS = int(GRID_WIDTH/CELL_WIDTH)
+SNAKE_SPAWN_MARGIN = 5
 
 UP = 'UP'
 DOWN = 'DOWN'
 LEFT = 'LEFT'
 RIGHT = 'RIGHT'
+FPS = 5
 
 class Snake:
     def __init__(self):
-        self.body = [(random.randint(0, N_HORITZONTAL_CELLS-1), random.randint(0, N_VERTICAL_CELLS-1))]
+        self.body = [(random.randint(0+SNAKE_SPAWN_MARGIN, N_HORITZONTAL_CELLS-1-SNAKE_SPAWN_MARGIN), random.randint(0+SNAKE_SPAWN_MARGIN, N_VERTICAL_CELLS-1-SNAKE_SPAWN_MARGIN))]
         self.direction = RIGHT
         self.apple = self.new_apple()
 
@@ -84,29 +85,29 @@ def draw_grid():
     for y in range(0, GRID_HEIGHT + 1, CELL_HEIGHT):
         pygame.draw.line(SCREEN, WHITE, (0,y), (GRID_WIDTH + 1, y))
 
-
-
 def main():
     draw_grid()
     draw_apple()
     draw_snake()
     while True:
+        SNAKE.move()
+        draw_grid()
+        draw_snake()
+        pygame.display.update()
+        pygame.time.Clock().tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 stop()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+                if event.key == pygame.K_UP and SNAKE.direction != DOWN:
                     SNAKE.direction = UP
-                elif event.key == pygame.K_DOWN:
+                elif event.key == pygame.K_DOWN and SNAKE.direction != UP:
                     SNAKE.direction = DOWN
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT and SNAKE.direction != LEFT:
                     SNAKE.direction = RIGHT
-                elif event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_LEFT and SNAKE.direction != RIGHT:
                     SNAKE.direction = LEFT
-                SNAKE.move()
-                draw_grid()
-                draw_snake()
-                pygame.display.update()
+
 
 
 def draw_cell(x,y,color):
