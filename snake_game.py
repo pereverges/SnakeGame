@@ -48,7 +48,11 @@ class Snake:
             self.body.insert(0, (x - 1, y))
         elif self.direction == RIGHT:
             self.body.insert(0, (x + 1, y))
-        self.remove_tail()
+        if self.get_head() == self.get_apple():
+            self.apple = self.new_apple()
+            draw_apple()
+        else:
+            self.remove_tail()
 
     def new_apple(self):
         possible_values = list(range(0, N_VERTICAL_CELLS * N_HORITZONTAL_CELLS))
