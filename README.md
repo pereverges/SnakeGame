@@ -1,2 +1,2 @@
 # SnakeGame
-Creating skake game using Python with help of the library Pygame
+Creating snake game using Python with help of the library Pygame
