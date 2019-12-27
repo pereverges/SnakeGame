@@ -60,7 +60,7 @@ class Snake:
         x_head, y_head = self.get_head()
         if x_head < 0 or x_head >= N_HORITZONTAL_CELLS or y_head < 0 or y_head >= N_VERTICAL_CELLS:
             stop()
-        if self.eats_itself:
+        if self.eats_itself():
             stop()
 
     def eats_itself(self):
