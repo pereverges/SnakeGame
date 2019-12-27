@@ -60,6 +60,15 @@ class Snake:
         x_head, y_head = self.get_head()
         if x_head < 0 or x_head >= N_HORITZONTAL_CELLS or y_head < 0 or y_head >= N_VERTICAL_CELLS:
             stop()
+        if self.eats_itself:
+            stop()
+
+    def eats_itself(self):
+        x_head, y_head = self.get_head()
+        for x, y in self.body[1::]:
+            if x_head == x and y_head == y:
+                return True
+        return False
 
     def new_apple(self):
         possible_values = list(range(0, N_VERTICAL_CELLS * N_HORITZONTAL_CELLS))
