@@ -1,29 +1,37 @@
 import sys, pygame, random
 
-GRID_HEIGHT = 400
-GRID_WIDTH = 400
+#SIZES
+GRID_HEIGHT = GRID_WIDTH = 800
 CELL_HEIGHT = CELL_WIDTH = 20
+WINDOW_TEXT_HEIGHT = 100
+WINDOW_HEIGHT = GRID_HEIGHT + WINDOW_TEXT_HEIGHT
+WINDOW_WIDTH = GRID_WIDTH
+SNAKE_SPAWN_MARGIN = 5
+TEXT_MARGIN = 10
+
+#COLORS
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 RED = (255,0,0)
 GREEN = (0,255,0)
-WINDOW_HEIGHT = GRID_HEIGHT + 100
-WINDOW_WIDTH = GRID_WIDTH
+
+#NUMBER OF CELLS
 N_VERTICAL_CELLS = int(GRID_HEIGHT/CELL_HEIGHT)
 N_HORITZONTAL_CELLS = int(GRID_WIDTH/CELL_WIDTH)
-SNAKE_SPAWN_MARGIN = 5
 
+#DIRECTION
 UP = 'UP'
 DOWN = 'DOWN'
 LEFT = 'LEFT'
 RIGHT = 'RIGHT'
-FPS = 5
 
 class Snake:
     def __init__(self):
         self.body = [(random.randint(0+SNAKE_SPAWN_MARGIN, N_HORITZONTAL_CELLS-1-SNAKE_SPAWN_MARGIN), random.randint(0+SNAKE_SPAWN_MARGIN, N_VERTICAL_CELLS-1-SNAKE_SPAWN_MARGIN))]
-        self.direction = RIGHT
+        self.direction = UP
         self.apple = self.new_apple()
+        self.speed = 2
+        self.score = 0
 
     def size(self):
         return len(self.body)
@@ -31,16 +39,29 @@ class Snake:
     def get_head(self):
         return self.body[0]
 
-    def remove_tail(self):
-        x, y = self.body[self.size() - 1]
-        draw_cell(x,y,BLACK)
-        del self.body[self.size() - 1]
-
     def get_snake(self):
         return self.body
 
     def get_apple(self):
         return self.apple
+
+    def get_speed(self):
+        return self.speed
+
+    def get_apples_eaten(self):
+        return self.score
+
+    def remove_tail(self):
+        x, y = self.body[self.size() - 1]
+        draw_cell(x,y,BLACK)
+        del self.body[self.size() - 1]
+
+    def new_apple(self):
+        possible_values = list(range(0, N_VERTICAL_CELLS * N_HORITZONTAL_CELLS))
+        for x, y in self.body:
+            possible_values.remove(x * N_HORITZONTAL_CELLS + y)
+        position = random.choice(possible_values)
+        return int(position/N_HORITZONTAL_CELLS), position % N_HORITZONTAL_CELLS
 
     def move(self):
         x, y = self.get_head()
@@ -53,6 +74,10 @@ class Snake:
         elif self.direction == RIGHT:
             self.body.insert(0, (x + 1, y))
         if self.get_head() == self.get_apple():
+            if self.get_apples_eaten()%3 == 0:
+                self.speed += 1
+            self.score+=1
+            draw_score()
             self.apple = self.new_apple()
             draw_apple()
         else:
@@ -70,54 +95,31 @@ class Snake:
                 return True
         return False
 
-    def new_apple(self):
-        possible_values = list(range(0, N_VERTICAL_CELLS * N_HORITZONTAL_CELLS))
-        for x, y in self.body:
-            possible_values.remove(x * N_HORITZONTAL_CELLS + y)
-        position = random.choice(possible_values)
-        return int(position/N_HORITZONTAL_CELLS), position % N_HORITZONTAL_CELLS
-
-
+#GLOBAL INIT
 SNAKE = Snake()
 pygame.init()
+
 SCREEN = pygame.display.set_mode((WINDOW_WIDTH + 1, WINDOW_HEIGHT + 1))
 SCREEN.fill(BLACK)
 
+#INITS
+def text_init():
+    pygame.font.init()
+    draw_score()
+
+#EXIT GAME
 
 def stop():
     pygame.quit()
     sys.exit()
+
+#DRAWERS
 
 def draw_grid():
     for x in range(0, GRID_WIDTH + 1, CELL_WIDTH):
         pygame.draw.line(SCREEN, WHITE, (x,0), (x, GRID_HEIGHT + 1))
     for y in range(0, GRID_HEIGHT + 1, CELL_HEIGHT):
         pygame.draw.line(SCREEN, WHITE, (0,y), (GRID_WIDTH + 1, y))
-
-def main():
-    draw_grid()
-    draw_apple()
-    draw_snake()
-    while True:
-        SNAKE.move()
-        draw_grid()
-        draw_snake()
-        pygame.display.update()
-        pygame.time.Clock().tick(FPS)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                stop()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP and SNAKE.direction != DOWN:
-                    SNAKE.direction = UP
-                elif event.key == pygame.K_DOWN and SNAKE.direction != UP:
-                    SNAKE.direction = DOWN
-                elif event.key == pygame.K_RIGHT and SNAKE.direction != LEFT:
-                    SNAKE.direction = RIGHT
-                elif event.key == pygame.K_LEFT and SNAKE.direction != RIGHT:
-                    SNAKE.direction = LEFT
-
-
 
 def draw_cell(x,y,color):
     x = x*CELL_WIDTH
@@ -130,9 +132,43 @@ def draw_apple():
     x, y = SNAKE.get_apple()
     draw_cell(x,y,RED)
 
-
 def draw_snake():
     for x,y in SNAKE.get_snake():
         draw_cell(x,y,GREEN)
+
+def draw_score():
+    font_score = pygame.font.SysFont('Exo', 32)
+    cell = pygame.Rect(0, GRID_HEIGHT, GRID_WIDTH,  WINDOW_TEXT_HEIGHT)
+    pygame.draw.rect(SCREEN, BLACK, cell)
+    score_text_surface = font_score.render('Score: ' + str(SNAKE.score), False, WHITE)
+    SCREEN.blit(score_text_surface,(TEXT_MARGIN,GRID_HEIGHT+TEXT_MARGIN))
+    speed_text_surface = font_score.render('Speed: ' + str(SNAKE.speed - 1), False, WHITE)
+    SCREEN.blit(speed_text_surface,(TEXT_MARGIN,GRID_HEIGHT+TEXT_MARGIN+25))
+
+#MAIN LOOP
+
+def main():
+    draw_grid()
+    draw_apple()
+    draw_snake()
+    text_init()
+    while True:
+        SNAKE.move()
+        draw_grid()
+        draw_snake()
+        pygame.display.update()
+        pygame.time.Clock().tick(SNAKE.get_speed())
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                stop()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP and SNAKE.direction != DOWN:
+                    SNAKE.direction = UP
+                elif event.key == pygame.K_DOWN and SNAKE.direction != UP:
+                    SNAKE.direction = DOWN
+                elif event.key == pygame.K_RIGHT and SNAKE.direction != LEFT:
+                    SNAKE.direction = RIGHT
+                elif event.key == pygame.K_LEFT and SNAKE.direction != RIGHT:
+                    SNAKE.direction = LEFT
 
 main()
