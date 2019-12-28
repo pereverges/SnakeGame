@@ -32,6 +32,8 @@ class Snake:
         self.apple = self.new_apple()
         self.speed = 2
         self.score = 0
+        self.pause = False
+        self.lost = False
 
     def size(self):
         return len(self.body)
@@ -84,10 +86,9 @@ class Snake:
             self.remove_tail()
         x_head, y_head = self.get_head()
         if x_head < 0 or x_head >= N_HORITZONTAL_CELLS or y_head < 0 or y_head >= N_VERTICAL_CELLS:
-            stop()
+            lost()
         if self.eats_itself():
-            stop()
-
+            lost()
     def eats_itself(self):
         x_head, y_head = self.get_head()
         for x, y in self.body[1::]:
@@ -106,6 +107,12 @@ SCREEN.fill(BLACK)
 def text_init():
     pygame.font.init()
     draw_score()
+
+def screen_init():
+    draw_grid()
+    draw_apple()
+    draw_snake()
+    text_init()
 
 #EXIT GAME
 
@@ -145,30 +152,61 @@ def draw_score():
     speed_text_surface = font_score.render('Speed: ' + str(SNAKE.speed - 1), False, WHITE)
     SCREEN.blit(speed_text_surface,(TEXT_MARGIN,GRID_HEIGHT+TEXT_MARGIN+25))
 
+def lost():
+    SNAKE.lost = True
+    font_score = pygame.font.SysFont('Exo', 50)
+    text_cell = pygame.Rect(0, GRID_HEIGHT+1, GRID_WIDTH, WINDOW_TEXT_HEIGHT)
+    pygame.draw.rect(SCREEN, BLACK, text_cell)
+    pygame.display.update()
+    score_text_surface = font_score.render('YOU LOST WITH AN SCORE OF ' + str(SNAKE.score), False, WHITE)
+    SCREEN.blit(score_text_surface, (100, GRID_HEIGHT + 20))
+    pygame.display.update()
+
+
 #MAIN LOOP
 
-def main():
-    draw_grid()
-    draw_apple()
-    draw_snake()
-    text_init()
+def restart_game():
+    #TODO THIS IS NOT WORKING PROPERLY
+    global SNAKE
+    SNAKE = Snake()
+
+
+def loop():
     while True:
-        SNAKE.move()
-        draw_grid()
-        draw_snake()
-        pygame.display.update()
-        pygame.time.Clock().tick(SNAKE.get_speed())
+        if not SNAKE.pause and not SNAKE.lost:
+            SNAKE.move()
+            draw_grid()
+            draw_snake()
+            pygame.display.update()
+            pygame.time.Clock().tick(SNAKE.get_speed())
+            if SNAKE.lost:
+                lost()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 stop()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP and SNAKE.direction != DOWN:
-                    SNAKE.direction = UP
-                elif event.key == pygame.K_DOWN and SNAKE.direction != UP:
-                    SNAKE.direction = DOWN
-                elif event.key == pygame.K_RIGHT and SNAKE.direction != LEFT:
-                    SNAKE.direction = RIGHT
-                elif event.key == pygame.K_LEFT and SNAKE.direction != RIGHT:
-                    SNAKE.direction = LEFT
+                if SNAKE.pause:
+                    if event.key == pygame.K_p:
+                        SNAKE.pause = False
+                elif SNAKE.lost:
+                    if event.key == pygame.K_r:
+                        restart_game()
+                else:
+                    if event.key == pygame.K_UP and SNAKE.direction != DOWN:
+                        SNAKE.direction = UP
+                    elif event.key == pygame.K_DOWN and SNAKE.direction != UP:
+                        SNAKE.direction = DOWN
+                    elif event.key == pygame.K_RIGHT and SNAKE.direction != LEFT:
+                        SNAKE.direction = RIGHT
+                    elif event.key == pygame.K_LEFT and SNAKE.direction != RIGHT:
+                        SNAKE.direction = LEFT
+                    elif event.key == pygame.K_p:
+                        SNAKE.pause = True
+
+
+
+def main():
+    screen_init()
+    loop()
 
 main()
