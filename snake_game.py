@@ -89,6 +89,7 @@ class Snake:
             lost()
         if self.eats_itself():
             lost()
+            
     def eats_itself(self):
         x_head, y_head = self.get_head()
         for x, y in self.body[1::]:
