@@ -10,4 +10,4 @@ In my version, every time the snake eats an apple the player gets one point adde
 ## Controls
 The player can only change the direction of the snake using the arrows, and I added the functionality of pause using the key **[p]** of your keyboard. When the player loses the game can restart it pressing the **[r]** key.
 
-![alt text](http://url/to/img.png)
+![alt text](https://github.com/pereverges/SnakeGame/blob/master/SnakeGame.png)
