@@ -148,28 +148,42 @@ def draw_score():
     cell = pygame.Rect(0, GRID_HEIGHT, GRID_WIDTH,  WINDOW_TEXT_HEIGHT)
     pygame.draw.rect(SCREEN, BLACK, cell)
     score_text_surface = font_score.render('Score: ' + str(SNAKE.score), False, WHITE)
-    SCREEN.blit(score_text_surface,(TEXT_MARGIN,GRID_HEIGHT+TEXT_MARGIN))
+    SCREEN.blit(score_text_surface,(TEXT_MARGIN,GRID_HEIGHT+TEXT_MARGIN+10))
     speed_text_surface = font_score.render('Speed: ' + str(SNAKE.speed - 1), False, WHITE)
-    SCREEN.blit(speed_text_surface,(TEXT_MARGIN,GRID_HEIGHT+TEXT_MARGIN+25))
+    SCREEN.blit(speed_text_surface,(TEXT_MARGIN,GRID_HEIGHT+TEXT_MARGIN+40))
+    score_text_surface = font_score.render('Pause: [P]', False, WHITE)
+    SCREEN.blit(score_text_surface,(WINDOW_WIDTH-115,GRID_HEIGHT+TEXT_MARGIN+10))
+    pygame.display.update()
+
+def draw_text(text):
+    font_score = pygame.font.SysFont('Exo', 40)
+    cell = pygame.Rect(200, GRID_HEIGHT+1, GRID_WIDTH, WINDOW_TEXT_HEIGHT)
+    pygame.draw.rect(SCREEN, BLACK, cell)
+    score_text_surface = font_score.render(text, False, WHITE)
+    SCREEN.blit(score_text_surface, (340, GRID_HEIGHT + TEXT_MARGIN+25))
+    pygame.display.update()
 
 def lost():
     SNAKE.lost = True
-    font_score = pygame.font.SysFont('Exo', 50)
+    font_score = pygame.font.SysFont('Exo', 40)
     text_cell = pygame.Rect(0, GRID_HEIGHT+1, GRID_WIDTH, WINDOW_TEXT_HEIGHT)
     pygame.draw.rect(SCREEN, BLACK, text_cell)
     pygame.display.update()
     score_text_surface = font_score.render('YOU LOST WITH AN SCORE OF ' + str(SNAKE.score), False, WHITE)
-    SCREEN.blit(score_text_surface, (100, GRID_HEIGHT + 20))
+    SCREEN.blit(score_text_surface, (160, GRID_HEIGHT + TEXT_MARGIN+25))
+    font_score = pygame.font.SysFont('Exo', 32)
+    score_text_surface = font_score.render('To restart press R', False, WHITE)
+    SCREEN.blit(score_text_surface, (280, GRID_HEIGHT + TEXT_MARGIN + 55))
     pygame.display.update()
-
 
 #MAIN LOOP
 
 def restart_game():
-    #TODO THIS IS NOT WORKING PROPERLY
     global SNAKE
     SNAKE = Snake()
-
+    cell = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+    pygame.draw.rect(SCREEN, BLACK, cell)
+    screen_init()
 
 def loop():
     while True:
@@ -188,6 +202,7 @@ def loop():
                 if SNAKE.pause:
                     if event.key == pygame.K_p:
                         SNAKE.pause = False
+                        draw_score()
                 elif SNAKE.lost:
                     if event.key == pygame.K_r:
                         restart_game()
@@ -201,9 +216,8 @@ def loop():
                     elif event.key == pygame.K_LEFT and SNAKE.direction != RIGHT:
                         SNAKE.direction = LEFT
                     elif event.key == pygame.K_p:
+                        draw_text('PAUSE')
                         SNAKE.pause = True
-
-
 
 def main():
     screen_init()
